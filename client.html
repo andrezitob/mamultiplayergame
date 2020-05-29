@@ -1,14 +1,71 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Ma first game</title>
+		<title> Ma first Game </title>
 		<style>
-			#tela	{
-				border: 1px solid #CCC;
+			#tela {
+				border: 10px solid #CCC;
+				image-rendering: pixelated;
+				image-rendering: crisp-edges;
+				image-rendering: -moz-crisp-edges;
+				width: 200px;
+				height: 200px;
+				
 			}
 		</style>
 	</head>
 	<body>
-		<canvas id="tela" width=500 height=500></canvas>
+		<canvas id="tela" width = 10 height = 10 > </canvas>
 	</body>
+	
+	<script>
+		const tela = document.getElementById('tela')
+		const contexto = tela.getContext('2d')
+		
+		const jogo = {
+			jogadores : {
+				'player1' : { x : 0, y : 0},
+				'player2' : { x : 5, y : 2}
+			},
+			frutas : {
+				'fruit1' : { x : 5, y : 4}				
+			}
+		}
+		i = 0
+        renderTela()
+        function createGame(){
+            function movePlayer(command){
+                console.log(`moving ${command.playerId} with ${command.keyPressed}`)
+            }
+            return movePlayer()
+        }
+		function renderTela(){
+			contexto.fillStyle = 'white'
+			contexto.fillRect(0,0,10,10)
+			for (playerId in jogo.jogadores){
+				const player = jogo.jogadores[playerId]
+				contexto.fillStyle = 'black'
+				contexto.fillRect(player.x, player.y, 1, 1)
+			}
+			for (fruitId in jogo.frutas){
+				const fruit = jogo.frutas[fruitId]
+				contexto.fillStyle = 'green'
+				contexto.fillRect(fruit.x, fruit.y, 1,1)
+				
+			}
+			
+			i = i + 0.02
+			
+			if (i > 10){
+				i = 0
+			}
+			
+			contexto.fillStyle = 'black'
+			contexto.fillRect(Math.floor(i),6,1,1)
+			requestAnimationFrame(renderTela)
+			
+		}
+	</script>
+
 </html>
+
