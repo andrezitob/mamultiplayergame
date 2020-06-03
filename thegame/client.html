@@ -1,0 +1,196 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title> Ma first Game </title>
+		<style>
+			#tela {
+				border: 10px solid #CCC;
+				
+				image-rendering: crisp-edges;
+				image-rendering: -moz-crisp-edges;
+				image-rendering: pixelated; 
+				width: 200px;
+				height: 200px;
+				
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="tela" width = 10 height = 10 > </canvas>
+	</body>
+	
+	<script type = "module">
+        //git pod servidor local: npx serve
+        import criarOuvinteDoTeclado from './ouvinteDoTeclado.js'
+		const tela = document.getElementById('tela')
+		const contexto = tela.getContext('2d')
+		//const currentPlayerId = 'jogador1'		
+		const jogo = criarJogo()
+		
+		const ouvinteDoTeclado = criarOuvinteDoTeclado()
+		ouvinteDoTeclado.subscrever(jogo.moverJogador)//moverJogador vira um observador da função ouvinteDoTeclado
+        jogo.adicionarJogador({idJogador: 'jogador1', xJogador: 1, yJogador: 3})
+        jogo.adicionarFruta({idFruta: 'elfruton', xFruta: 4, yFruta: 4})
+        //jogo.removerJogador('jogador1')
+        renderizarTela()
+		//-----------------------------------------------
+
+		function criarJogo(){
+			const estado = {
+				jogadores : {
+			
+				},
+				frutas : {
+									
+				}			
+			}
+			
+			function adicionarJogador(comando){//comando aqui deve ser um objeto que representa um jogador, e que deve ter um idJogador, e coordenadas dadas
+				const idJogador = comando.idJogador
+				const xJogador = comando.xJogador
+				const yJogador = comando.yJogador
+				estado.jogadores[idJogador] = {
+					x : xJogador,
+					y : yJogador
+				}
+			}
+			function removerJogador(comando){
+				idJogador = comando.idJogador
+				delete estado.jogadores[idJogador]
+			}
+						
+			function adicionarFruta(comando){//comando aqui deve ser um objeto que representa um jogador, e que deve ter um idJogador, e coordenadas dadas
+				const idFruta = comando.idFruta
+				const xFruta = comando.xFruta
+				const yFruta = comando.yFruta
+				estado.frutas[idFruta] = {
+					x : xFruta,
+					y : yFruta
+				}
+			}
+			function removerFruta(idFruta){
+				//const idFruta = idFruta
+				delete estado.frutas[idFruta]
+			}
+			
+            function moverJogador(comando){//comando 
+				//console.log(`movendo ${comando.idJogador} com ${comando.keyPressionada}`)
+
+				
+				const movimentosAceitos = {
+					ArrowUp(jogador){
+						
+						jogador.y -= 1
+						if(jogador.y < 0){
+							jogador.y = 0
+							console.log('borda atingida')
+						}
+						else{
+							console.log('movendo para cima')
+						}
+					},
+					ArrowDown(jogador){
+					
+						
+						jogador.y += 1
+						if(jogador.y > 9){
+							jogador.y = 9
+							console.log('borda atingida')
+						}
+						else{
+							console.log('movendo para baixo')
+						}
+					},
+					ArrowLeft(jogador){
+						
+						jogador.x -= 1
+						if(jogador.x < 0){
+							jogador.x = 0
+							console.log('borda atingida')
+						}
+						else{
+							console.log('movendo para esquerda')
+						}
+					},
+					ArrowRight(jogador){
+						
+						jogador.x += 1
+						if(jogador.x > 9){
+							jogador.x = 9
+							console.log('borda atingida')
+						}
+						else{
+							console.log('movendo para direita')
+						}
+					}
+				}
+
+				const keyPressionada = comando.keyPressionada
+				const jogador = estado.jogadores[comando.idJogador]
+				const funcaoDeMovimentacao = movimentosAceitos[keyPressionada]
+				if (funcaoDeMovimentacao && jogador){//se funcaodemovimento for undefined, oq acontece caso o movimentosAceitos[keyPressionada], que deve ter algum valor dos movimentosAceitos não fazer parte dos movimentos aceitos (tipo uma tecla q não tem uma funcionalidade usada, e que logicamente não deveria estar em movimentosAceitos), o funçãodemovimento não terá valor, assim não é uma função usável. o if checa se ele tem valor ou não
+					funcaoDeMovimentacao(jogador)
+					detectarColisaoJogadorFruta(jogador)
+				}
+				
+
+				return
+				
+				if (keyPressionada === 'ArrowDown' ){
+					jogador.y += 1
+					//return
+				}
+				if (keyPressionada === 'ArrowUp' ){
+					jogador.y -= 1
+					//return
+				}
+				if (keyPressionada === 'ArrowRight' ){
+					jogador.x += 1
+					//return
+				}
+				if (keyPressionada === 'ArrowLeft' ){
+					jogador.x -= 1
+					//return
+				}
+			}
+			function detectarColisaoJogadorFruta(jogador){
+				//const jogador = estado.jogadores[idJogador]
+				
+				for (idFruta in estado.frutas){
+					const fruta = estado.frutas[idFruta]	
+					if (fruta.x === jogador.x && fruta.y === jogador.y){
+						console.log('colisão detectada')
+						removerFruta(idFruta)
+						break
+					}
+				}
+			}
+			return{//deixa essas funcoes abaixo publicas
+				moverJogador,
+				estado,
+				adicionarJogador,
+				removerJogador,
+				adicionarFruta,
+				removerFruta
+			}    
+        }
+
+		
+
+		function renderizarTela(){
+			contexto.clearRect(0,0,10,10)
+			for (const idJogador in jogo.estado.jogadores){
+				const jogador = jogo.estado.jogadores[idJogador]
+				contexto.fillStyle = 'black'
+				contexto.fillRect(jogador.x, jogador.y, 1, 1)
+			}
+			for (const idFruta in jogo.estado.frutas){
+				const fruta = jogo.estado.frutas[idFruta]
+				contexto.fillStyle = 'green'
+				contexto.fillRect(fruta.x, fruta.y, 1, 1)
+				
+			}
+			requestAnimationFrame(renderizarTela)
+		}
+	</script>
+</html>
